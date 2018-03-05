@@ -25,3 +25,23 @@ export const addressFunctionP2WPKH = (node) => {
 
   return bitcoin.address.fromOutputScript(scriptPubKey, node.getNetwork())
 }
+
+export const signInputFunctionP2PKH = (sendTx, i, node) => {
+  sendTx.sign(i, node);
+}
+
+export const signInputFunctionP2SHP2WPKH = (sendTx, i, node, inputValue) => {
+  var pubKey = node.getPublicKeyBuffer();
+  var pubKeyHash = bitcoin.crypto.hash160(pubKey);
+  var redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
+
+  sendTx.sign(i, node, redeemScript, null, inputValue);
+}
+
+export const signInputFunctionP2WPKH = (sendTx, i, node, inputValue) => {
+  var pubKey = node.getPublicKeyBuffer();
+  var pubKeyHash = bitcoin.crypto.hash160(pubKey);
+  var redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
+
+  sendTx.sign(i, node, redeemScript, null, inputValue);
+}
