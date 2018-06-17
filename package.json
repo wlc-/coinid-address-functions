@@ -1,0 +1,9 @@
+{
+  "name": "coinid-address-functions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://wlc-@github.com/wlc-/coinid-address-functions.git",
+  "author": "wlc- <wwwwllllcccc@gmail.com>",
+  "license": "MIT",
+  "dependencies": {}
+}
