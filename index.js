@@ -39,9 +39,25 @@ export const signInputFunctionP2SHP2WPKH = (sendTx, i, node, inputValue) => {
 }
 
 export const signInputFunctionP2WPKH = (sendTx, i, node, inputValue) => {
-  var pubKey = node.getPublicKeyBuffer();
-  var pubKeyHash = bitcoin.crypto.hash160(pubKey);
-  var redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
-
-  sendTx.sign(i, node, redeemScript, null, inputValue);
+  sendTx.sign(i, node, null, null, inputValue);
 }
+
+export const addInputFunctionP2PKH = (sendTx, input, sequence) => {
+  sendTx.addInput(input.hash, input.index, sequence);
+}
+
+export const addInputFunctionP2SHP2WPKH = (sendTx, input, sequence) => {
+  sendTx.addInput(input.hash, input.index, sequence);
+}
+
+export const addInputFunctionP2WPKH = (sendTx, input, sequence, account) => {
+  const node = account.derive(input.address);
+
+  const pubKey = node.getPublicKeyBuffer();
+  const pubKeyHash = bitcoin.crypto.hash160(pubKey);
+  const redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
+
+  sendTx.addInput(input.hash, input.index, sequence, redeemScript);
+}
+
+
