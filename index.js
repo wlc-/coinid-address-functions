@@ -50,14 +50,14 @@ export const addInputFunctionP2SHP2WPKH = (sendTx, input, sequence) => {
   sendTx.addInput(input.hash, input.index, sequence);
 }
 
-export const addInputFunctionP2WPKH = (sendTx, input, sequence, account) => {
-  const node = account.derive(input.address);
-
-  const pubKey = node.getPublicKeyBuffer();
-  const pubKeyHash = bitcoin.crypto.hash160(pubKey);
-  const redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
-
+export const addInputFunctionP2WPKH = (sendTx, input, sequence, node) => {
+  const redeemScript = getP2WPKHRedeemScript(node);
   sendTx.addInput(input.hash, input.index, sequence, redeemScript);
 }
 
-
+const getP2WPKHRedeemScript = (node) => {
+  const pubKey = node.getPublicKeyBuffer();
+  const pubKeyHash = bitcoin.crypto.hash160(pubKey);
+  const redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(pubKeyHash);
+  return redeemScript;
+}
