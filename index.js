@@ -12,6 +12,10 @@ export const addressFunctionP2PKH = (node) => {
 }
 
 export const addressFunctionP2SHP2WPKH = (node) => {
+  if (!node.compressed) {
+    throw('Cannot create P2SHP2WPKH address from uncompressed key');
+  }
+
   const pubKey = node.getPublicKeyBuffer(),
         redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey)),
         scriptPubKey = bitcoin.script.scriptHash.output.encode(bitcoin.crypto.hash160(redeemScript));
@@ -20,6 +24,10 @@ export const addressFunctionP2SHP2WPKH = (node) => {
 }
 
 export const addressFunctionP2WPKH = (node) => {
+  if (!node.compressed) {
+    throw('Cannot create P2WPKH address from uncompressed key');
+  }
+
   const pubKey = node.getPublicKeyBuffer(),
         scriptPubKey = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey))
 
