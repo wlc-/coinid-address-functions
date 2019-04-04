@@ -4,25 +4,45 @@
 
 const bitcoin = require('bitcoinjs-lib');
 
-export const addressFunctionP2PKH = (node) => {
-  const pubKey = node.getPublicKeyBuffer(),
-        scriptPubKey = bitcoin.script.pubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey));
+const isCompressed = (node) => (node.keyPair && node.keyPair.compressed) ? true : node.compressed;
 
-  return bitcoin.address.fromOutputScript(scriptPubKey, node.getNetwork())
+export const pubKeyToP2PKH = (pubKey, network) => {
+  const scriptPubKey = bitcoin.script.pubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey));
+
+  return bitcoin.address.fromOutputScript(scriptPubKey, network)
 }
 
-const isCompressed = (node) => (node.keyPair && node.keyPair.compressed) ? true : node.compressed;
+export const pubKeyToP2SHP2WPKH = (pubKey, network) => {
+  const redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey)),
+        scriptPubKey = bitcoin.script.scriptHash.output.encode(bitcoin.crypto.hash160(redeemScript));
+
+  return bitcoin.address.fromOutputScript(scriptPubKey, network);
+}
+
+export const pubKeyToP2WPKH = (pubKey, network) => {
+  const scriptPubKey = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey))
+
+  return bitcoin.address.fromOutputScript(scriptPubKey, network)
+}
+
+export const getAllPossibleAddressesFromPubKey = (pubKey, network) => [
+  pubKeyToP2PKH(pubKey, network),
+  pubKeyToP2SHP2WPKH(pubKey, network),
+  pubKeyToP2WPKH(pubKey, network)
+]
+
+export const addressFunctionP2PKH = (node) => {
+  const pubKey = node.getPublicKeyBuffer();
+  return pubKeyToP2PKH(pubKey, node.getNetwork());
+}
 
 export const addressFunctionP2SHP2WPKH = (node) => {
   if (!isCompressed(node)) {
     throw('Cannot create P2SH-P2WPKH address from uncompressed key');
   }
 
-  const pubKey = node.getPublicKeyBuffer(),
-        redeemScript = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey)),
-        scriptPubKey = bitcoin.script.scriptHash.output.encode(bitcoin.crypto.hash160(redeemScript));
-
-  return bitcoin.address.fromOutputScript(scriptPubKey, node.getNetwork());
+  const pubKey = node.getPublicKeyBuffer();
+  return pubKeyToP2SHP2WPKH(pubKey, node.getNetwork());
 }
 
 export const addressFunctionP2WPKH = (node) => {
@@ -30,10 +50,8 @@ export const addressFunctionP2WPKH = (node) => {
     throw('Cannot create P2WPKH address from uncompressed key');
   }
 
-  const pubKey = node.getPublicKeyBuffer(),
-        scriptPubKey = bitcoin.script.witnessPubKeyHash.output.encode(bitcoin.crypto.hash160(pubKey))
-
-  return bitcoin.address.fromOutputScript(scriptPubKey, node.getNetwork())
+  const pubKey = node.getPublicKeyBuffer();
+  return pubKeyToP2WPKH(pubKey, node.getNetwork());
 }
 
 export const signInputFunctionP2PKH = (sendTx, i, node) => {
